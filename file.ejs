@@ -1,0 +1,33 @@
+<%- include('header') %>
+
+<section class="file-card">
+  <% if (isNew) { %>
+    <div class="confetti-banner">🎉 فایل با موفقیت آپلود شد!</div>
+  <% } %>
+
+  <div class="file-icon-wrap">
+    <div class="file-icon">📄</div>
+  </div>
+  <h1 class="file-name"><%= file.originalName %></h1>
+  <p class="file-meta"><%= formatBytes(file.size) %> · آپلود شده <%= timeAgo(file.createdAt) %> · <%= file.downloads %> دانلود</p>
+
+  <a href="/download/<%= file.code %>" class="btn btn-primary btn-lg btn-block">⬇ دانلود فایل</a>
+
+  <div class="share-box">
+    <input type="text" readonly value="<%= shareUrl %>" id="share-url" />
+    <button class="btn btn-ghost" id="copy-btn">کپی لینک</button>
+  </div>
+</section>
+
+<script>
+  document.getElementById('copy-btn').addEventListener('click', function () {
+    const input = document.getElementById('share-url');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+      this.textContent = '✓ کپی شد!';
+      setTimeout(() => (this.textContent = 'کپی لینک'), 2000);
+    });
+  });
+</script>
+
+<%- include('footer') %>

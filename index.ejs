@@ -1,0 +1,115 @@
+<%- include('header') %>
+
+<section class="hero">
+  <div class="hero-badge">⚡ سریع، امن و رایگان</div>
+  <h1 class="hero-title">فایل‌ات رو آپلود کن،<br /><span class="gradient-text">لینک بگیر، پرواز بده.</span></h1>
+  <p class="hero-sub">بدون نیاز به نصب برنامه. فقط فایل رو بکش و رها کن، لینک دانلود آماده می‌شه.</p>
+
+  <form action="/upload" method="POST" enctype="multipart/form-data" id="upload-form" class="upload-card">
+    <label for="file-input" class="dropzone" id="dropzone">
+      <input type="file" name="file" id="file-input" hidden required />
+      <div class="dropzone-icon">⇧</div>
+      <div class="dropzone-text" id="dropzone-text">فایل را اینجا رها کنید یا کلیک کنید</div>
+      <div class="dropzone-hint">حداکثر حجم مجاز: <%= maxSizeMb %> مگابایت</div>
+    </label>
+
+    <div class="progress-wrap" id="progress-wrap" hidden>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label">۰٪</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block" id="upload-btn">
+      <span id="upload-btn-text">آپلود فایل</span>
+    </button>
+  </form>
+
+  <p class="hero-note">
+    نیازی به ثبت‌نام نیست — فقط آپلود کن و لینک بگیر.
+  </p>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon">⚡</div>
+    <h3>سریع</h3>
+    <p>آپلود و ساخت لینک اشتراک‌گذاری در چند ثانیه.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🔒</div>
+    <h3>امن</h3>
+    <p>هر فایل یک لینک تصادفی و غیرقابل حدس دارد.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🚀</div>
+    <h3>بدون ثبت‌نام</h3>
+    <p>هیچ حساب کاربری لازم نیست، فقط فایلت رو بده لینک بگیر.</p>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
+<script>
+  const dz = document.getElementById('dropzone');
+  const input = document.getElementById('file-input');
+  const text = document.getElementById('dropzone-text');
+  const form = document.getElementById('upload-form');
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const uploadBtn = document.getElementById('upload-btn');
+  const uploadBtnText = document.getElementById('upload-btn-text');
+
+  input.addEventListener('change', () => {
+    if (input.files && input.files[0]) {
+      text.textContent = input.files[0].name;
+      dz.classList.add('dropzone-filled');
+    }
+  });
+
+  ['dragover', 'dragenter'].forEach((evt) =>
+    dz.addEventListener(evt, (e) => { e.preventDefault(); dz.classList.add('dropzone-active'); })
+  );
+  ['dragleave', 'drop'].forEach((evt) =>
+    dz.addEventListener(evt, (e) => { e.preventDefault(); dz.classList.remove('dropzone-active'); })
+  );
+  dz.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      input.files = e.dataTransfer.files;
+      text.textContent = e.dataTransfer.files[0].name;
+      dz.classList.add('dropzone-filled');
+    }
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!input.files[0]) {
+      input.reportValidity();
+      return;
+    }
+    const formData = new FormData(form);
+    uploadBtn.disabled = true;
+    uploadBtnText.textContent = 'در حال آپلود...';
+    progressWrap.hidden = false;
+
+    axios
+      .post('/upload', formData, {
+        onUploadProgress: (evt) => {
+          const percent = Math.round((evt.loaded * 100) / evt.total);
+          progressFill.style.width = percent + '%';
+          progressLabel.textContent = percent + '٪';
+        }
+      })
+      .then((res) => {
+        progressFill.style.width = '100%';
+        progressLabel.textContent = '✓';
+        window.location.href = res.request.responseURL || '/';
+      })
+      .catch(() => {
+        uploadBtn.disabled = false;
+        uploadBtnText.textContent = 'آپلود فایل';
+        progressWrap.hidden = true;
+        alert('خطا در آپلود. دوباره تلاش کنید.');
+      });
+  });
+</script>
+
+<%- include('footer') %>

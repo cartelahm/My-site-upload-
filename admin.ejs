@@ -1,0 +1,68 @@
+<%- include('header') %>
+
+<section class="page-header">
+  <h1>پنل مدیریت</h1>
+  <form action="<%= adminBase %>/logout" method="POST">
+    <button type="submit" class="btn btn-ghost btn-sm">خروج</button>
+  </form>
+</section>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">📁</div>
+    <div class="stat-value" data-count="<%= stats.totalFiles %>">0</div>
+    <div class="stat-label">فایل‌ها</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">⬇</div>
+    <div class="stat-value" data-count="<%= stats.totalDownloads %>">0</div>
+    <div class="stat-label">دانلودها</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💾</div>
+    <div class="stat-value-text"><%= formatBytes(stats.totalStorageBytes) %></div>
+    <div class="stat-label">حجم کل ذخیره‌شده</div>
+  </div>
+</div>
+
+<h2 class="section-title">فایل‌ها</h2>
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>نام فایل</th><th>حجم</th><th>دانلودها</th><th>تاریخ</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% files.forEach(function(f) { %>
+        <tr>
+          <td><a href="/f/<%= f.code %>"><%= f.originalName %></a></td>
+          <td><%= formatBytes(f.size) %></td>
+          <td><%= f.downloads %></td>
+          <td><%= timeAgo(f.createdAt) %></td>
+          <td>
+            <form action="<%= adminBase %>/files/<%= f.code %>/delete" method="POST" onsubmit="return confirm('حذف شود؟');">
+              <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!files.length) { %>
+        <tr><td colspan="5" class="muted" style="text-align:center; padding:24px;">هنوز فایلی آپلود نشده.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.querySelectorAll('.stat-value').forEach(function (el) {
+    const target = parseInt(el.getAttribute('data-count'), 10) || 0;
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 40));
+    const timer = setInterval(function () {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = current;
+    }, 25);
+  });
+</script>
+
+<%- include('footer') %>

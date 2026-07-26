@@ -1,0 +1,14 @@
+<%- include('header') %>
+
+<section class="auth-card">
+  <div class="auth-icon">🛡️</div>
+  <h1>ورود مدیریت</h1>
+
+  <form action="<%= adminBase %>/login" method="POST" class="form">
+    <label>رمز عبور</label>
+    <input type="password" name="password" required autofocus placeholder="••••••••" />
+    <button type="submit" class="btn btn-primary btn-block">ورود</button>
+  </form>
+</section>
+
+<%- include('footer') %>
